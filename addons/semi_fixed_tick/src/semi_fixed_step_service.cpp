@@ -2,11 +2,30 @@
 
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/string_name.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/variant/variant.hpp>
 
 using namespace godot;
 
 namespace sft {
+
+namespace {
+
+const Variant KEY_TARGET_TICK_RATE("target_tick_rate");
+const Variant KEY_MAX_STEPS_PER_FRAME("max_steps_per_frame");
+const Variant KEY_MAX_FRAME_DELTA("max_frame_delta");
+const Variant KEY_TIME_SCALE("time_scale");
+const Variant KEY_INTERPOLATION_ENABLED("interpolation_enabled");
+const Variant KEY_STEPS_TO_RUN("steps_to_run");
+const Variant KEY_STEP_DT("step_dt");
+const Variant KEY_ALPHA("alpha");
+const Variant KEY_WAS_CLAMPED("was_clamped");
+const Variant KEY_CLAMP_COUNT("clamp_count");
+const Variant KEY_REGISTERED_NODES("registered_nodes");
+const Variant KEY_REGISTERED_FIELDS("registered_fields");
+
+}
 
 void SemiFixedStepService::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_target_tick_rate", "rate"),
@@ -82,7 +101,7 @@ void SemiFixedStepService::_bind_methods() {
 
 void SemiFixedStepService::set_target_tick_rate(int p_rate) {
   Dictionary d;
-  d["target_tick_rate"] = p_rate;
+  d[KEY_TARGET_TICK_RATE] = p_rate;
   set_runtime_config(d);
 }
 
@@ -92,7 +111,7 @@ int SemiFixedStepService::get_target_tick_rate() const {
 
 void SemiFixedStepService::set_max_steps_per_frame(int p_value) {
   Dictionary d;
-  d["max_steps_per_frame"] = p_value;
+  d[KEY_MAX_STEPS_PER_FRAME] = p_value;
   set_runtime_config(d);
 }
 
@@ -102,7 +121,7 @@ int SemiFixedStepService::get_max_steps_per_frame() const {
 
 void SemiFixedStepService::set_max_frame_delta(double p_value) {
   Dictionary d;
-  d["max_frame_delta"] = p_value;
+  d[KEY_MAX_FRAME_DELTA] = p_value;
   set_runtime_config(d);
 }
 
@@ -112,7 +131,7 @@ double SemiFixedStepService::get_max_frame_delta() const {
 
 void SemiFixedStepService::set_time_scale(double p_value) {
   Dictionary d;
-  d["time_scale"] = p_value;
+  d[KEY_TIME_SCALE] = p_value;
   set_runtime_config(d);
 }
 
@@ -122,7 +141,7 @@ double SemiFixedStepService::get_time_scale() const {
 
 void SemiFixedStepService::set_interpolation_enabled(bool p_enabled) {
   Dictionary d;
-  d["interpolation_enabled"] = p_enabled;
+  d[KEY_INTERPOLATION_ENABLED] = p_enabled;
   set_runtime_config(d);
 }
 
@@ -144,10 +163,10 @@ Dictionary SemiFixedStepService::push_frame_delta(double p_frame_dt) {
               result.alpha);
 
   Dictionary out;
-  out["steps_to_run"] = result.steps_to_run;
-  out["step_dt"] = result.step_dt;
-  out["alpha"] = result.alpha;
-  out["was_clamped"] = result.was_clamped;
+  out[KEY_STEPS_TO_RUN] = result.steps_to_run;
+  out[KEY_STEP_DT] = result.step_dt;
+  out[KEY_ALPHA] = result.alpha;
+  out[KEY_WAS_CLAMPED] = result.was_clamped;
   return out;
 }
 
@@ -200,9 +219,9 @@ bool SemiFixedStepService::set_runtime_config(const Dictionary &p_config) {
 
 Dictionary SemiFixedStepService::get_metrics() const {
   Dictionary metrics;
-  metrics["clamp_count"] = clamp_count;
-  metrics["registered_nodes"] = interpolation_store.get_registered_node_count();
-  metrics["registered_fields"] =
+  metrics[KEY_CLAMP_COUNT] = clamp_count;
+  metrics[KEY_REGISTERED_NODES] = interpolation_store.get_registered_node_count();
+  metrics[KEY_REGISTERED_FIELDS] =
       interpolation_store.get_registered_field_count();
   return metrics;
 }

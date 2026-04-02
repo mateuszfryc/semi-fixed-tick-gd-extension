@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Godot: Run project (windows-debug)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${env:GODOT4_BIN}",
+      "args": [
+        "--path",
+        "${env:GODOT_PROJECT_PATH}"
+      ],
+      "cwd": "${env:GODOT_PROJECT_PATH}",
+      "preLaunchTask": "CMake: Build windows-debug",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Godot: Run project (windows-release)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${env:GODOT4_BIN}",
+      "args": [
+        "--path",
+        "${env:GODOT_PROJECT_PATH}"
+      ],
+      "cwd": "${env:GODOT_PROJECT_PATH}",
+      "preLaunchTask": "CMake: Build windows-release",
+      "console": "integratedTerminal"
+    }
+  ]
+}

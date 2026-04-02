@@ -85,7 +85,6 @@ void InterpolationStore::register_node(Node *p_node,
 
   NodeState state;
   state.fields = p_fields;
-  state.field_states.reserve(state.fields.size());
 
   for (int i = 0; i < state.fields.size(); i++) {
     const StringName field = state.fields[i];
@@ -104,37 +103,49 @@ void InterpolationStore::register_node(Node *p_node,
     state.field_states.push_back(field_state);
   }
 
-  nodes.insert(p_node->get_instance_id(), state);
+  nodes.insert(ObjectID(p_node->get_instance_id()), state);
 }
 
 void InterpolationStore::unregister_node(Node *p_node) {
   ERR_FAIL_NULL(p_node);
-  nodes.erase(p_node->get_instance_id());
+  nodes.erase(ObjectID(p_node->get_instance_id()));
 }
 
 void InterpolationStore::capture_prev_state() {
-  for (KeyValue<ObjectID, NodeState> &entry : nodes) {
+  for (const KeyValue<ObjectID, NodeState> &entry : nodes) {
     Node *node = Object::cast_to<Node>(ObjectDB::get_instance(entry.key));
     if (!node) {
       continue;
     }
 
-    for (int i = 0; i < entry.value.field_states.size(); i++) {
-      FieldState &field_state = entry.value.field_states[i];
+    NodeState *state = nodes.getptr(entry.key);
+    if (!state) {
+      continue;
+    }
+
+    FieldState *field_states = state->field_states.ptrw();
+    for (int i = 0; i < state->field_states.size(); i++) {
+      FieldState &field_state = field_states[i];
       field_state.prev_value = node->get(field_state.field);
     }
   }
 }
 
 void InterpolationStore::capture_curr_state() {
-  for (KeyValue<ObjectID, NodeState> &entry : nodes) {
+  for (const KeyValue<ObjectID, NodeState> &entry : nodes) {
     Node *node = Object::cast_to<Node>(ObjectDB::get_instance(entry.key));
     if (!node) {
       continue;
     }
 
-    for (int i = 0; i < entry.value.field_states.size(); i++) {
-      FieldState &field_state = entry.value.field_states[i];
+    NodeState *state = nodes.getptr(entry.key);
+    if (!state) {
+      continue;
+    }
+
+    FieldState *field_states = state->field_states.ptrw();
+    for (int i = 0; i < state->field_states.size(); i++) {
+      FieldState &field_state = field_states[i];
       field_state.curr_value = node->get(field_state.field);
     }
   }

@@ -17,3 +17,6 @@ mono_crash.*.json
 
 # Local tooling (diff logs, reviews)
 .local/
+
+# CMake build output
+build/

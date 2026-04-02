@@ -3,7 +3,7 @@
 
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/templates/vector.hpp>
-#include <godot_cpp/variant/object_id.hpp>
+#include <godot_cpp/core/object_id.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
 #include <godot_cpp/variant/string_name.hpp>
 #include <godot_cpp/variant/variant.hpp>
