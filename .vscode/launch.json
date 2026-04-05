@@ -2,30 +2,44 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Godot: Run project (windows-debug)",
-      "type": "cppvsdbg",
+      "name": "Rust Cargo debug",
+      "type": "node",
       "request": "launch",
-      "program": "${env:GODOT4_BIN}",
-      "args": [
-        "--path",
-        "${env:GODOT_PROJECT_PATH}"
-      ],
-      "cwd": "${env:GODOT_PROJECT_PATH}",
-      "preLaunchTask": "CMake: Build windows-debug",
-      "console": "integratedTerminal"
+      "program": "${workspaceFolder}/.vscode/launch_noop.js",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Cargo: Sync semi_fixed_tick debug",
+      "console": "internalConsole",
+      "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "Godot: Run project (windows-release)",
-      "type": "cppvsdbg",
+      "name": "Rust Cargo Editor debug",
+      "type": "node",
       "request": "launch",
-      "program": "${env:GODOT4_BIN}",
-      "args": [
-        "--path",
-        "${env:GODOT_PROJECT_PATH}"
-      ],
-      "cwd": "${env:GODOT_PROJECT_PATH}",
-      "preLaunchTask": "CMake: Build windows-release",
-      "console": "integratedTerminal"
+      "program": "${workspaceFolder}/.vscode/launch_noop.js",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Godot: Launch local project (semi_fixed_tick debug)",
+      "console": "internalConsole",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Rust Cargo release",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/.vscode/launch_noop.js",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Cargo: Sync semi_fixed_tick release",
+      "console": "internalConsole",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Rust Cargo Editor release",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/.vscode/launch_noop.js",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Godot: Launch local project (semi_fixed_tick release)",
+      "console": "internalConsole",
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

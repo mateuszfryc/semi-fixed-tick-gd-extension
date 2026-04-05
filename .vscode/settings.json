@@ -1,5 +1,4 @@
 {
-  "cmake.useCMakePresets": "always",
-  "cmake.configureOnOpen": false,
-  "cmake.sourceDirectory": "${workspaceFolder}"
+  "chatgpt.openOnStartup": true,
+  "godotTools.editorPath.godot4": "c:\\Dev\\godot_v4_6_1_stable_win64\\Godot_v4.6.1-stable_win64.exe"
 }

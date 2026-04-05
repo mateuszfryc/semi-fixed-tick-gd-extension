@@ -2,32 +2,13 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "CMake: Configure preset",
+      "label": "Cargo: Build semi_fixed_tick debug",
       "type": "shell",
-      "command": "powershell",
+      "command": "cargo",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "${workspaceFolder}\\scripts\\configure-gcc-preset.ps1",
-        "-Preset",
-        "${input:cmakePreset}"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "CMake: Build preset",
-      "type": "shell",
-      "dependsOn": "CMake: Configure preset",
-      "command": "cmake",
-      "args": [
-        "--build",
-        "--preset",
-        "${input:cmakePreset}"
+        "build",
+        "--manifest-path",
+        "${workspaceFolder}\\addons\\semi_fixed_tick\\Cargo.toml"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -37,57 +18,22 @@
         "isDefault": true
       },
       "problemMatcher": [
-        "$gcc"
+        "$rustc"
       ]
     },
     {
-      "label": "CMake: Build windows-debug",
+      "label": "Cargo: Sync semi_fixed_tick debug",
       "type": "shell",
-      "dependsOn": "CMake: Configure windows-debug",
-      "command": "cmake",
-      "args": [
-        "--build",
-        "--preset",
-        "windows-debug"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "problemMatcher": [
-        "$gcc"
-      ]
-    },
-    {
-      "label": "CMake: Build windows-release",
-      "type": "shell",
-      "dependsOn": "CMake: Configure windows-release",
-      "command": "cmake",
-      "args": [
-        "--build",
-        "--preset",
-        "windows-release"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "problemMatcher": [
-        "$gcc"
-      ]
-    },
-    {
-      "label": "CMake: Configure windows-debug",
-      "type": "shell",
+      "dependsOn": "Cargo: Build semi_fixed_tick debug",
       "command": "powershell",
       "args": [
         "-NoProfile",
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "${workspaceFolder}\\scripts\\configure-gcc-preset.ps1",
-        "-Preset",
-        "windows-debug"
+        "${workspaceFolder}\\scripts\\sync-rust-addon-binaries.ps1",
+        "-Profile",
+        "debug"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -95,7 +41,43 @@
       "problemMatcher": []
     },
     {
-      "label": "CMake: Configure windows-release",
+      "label": "Cargo: Build semi_fixed_tick release",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "build",
+        "--release",
+        "--manifest-path",
+        "${workspaceFolder}\\addons\\semi_fixed_tick\\Cargo.toml"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$rustc"
+      ]
+    },
+    {
+      "label": "Cargo: Sync semi_fixed_tick release",
+      "type": "shell",
+      "dependsOn": "Cargo: Build semi_fixed_tick release",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\sync-rust-addon-binaries.ps1",
+        "-Profile",
+        "release"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Godot: Launch local project (semi_fixed_tick debug)",
       "type": "shell",
       "command": "powershell",
       "args": [
@@ -103,26 +85,34 @@
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "${workspaceFolder}\\scripts\\configure-gcc-preset.ps1",
-        "-Preset",
-        "windows-release"
+        "${workspaceFolder}\\scripts\\run-godot-project.ps1",
+        "-ProjectPath",
+        "${workspaceFolder}"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
+      "dependsOn": "Cargo: Sync semi_fixed_tick debug",
       "problemMatcher": []
-    }
-  ],
-  "inputs": [
+    },
     {
-      "id": "cmakePreset",
-      "type": "pickString",
-      "description": "Choose a CMake preset",
-      "options": [
-        "windows-debug",
-        "windows-release"
+      "label": "Godot: Launch local project (semi_fixed_tick release)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\run-godot-project.ps1",
+        "-ProjectPath",
+        "${workspaceFolder}"
       ],
-      "default": "windows-debug"
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Cargo: Sync semi_fixed_tick release",
+      "problemMatcher": []
     }
   ]
 }

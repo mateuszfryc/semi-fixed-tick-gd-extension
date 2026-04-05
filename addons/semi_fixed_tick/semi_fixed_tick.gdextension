@@ -1,11 +1,8 @@
 [configuration]
-entry_symbol = "semi_fixed_tick_library_init"
-compatibility_minimum = "4.2"
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = "4.5"
+reloadable = true
 
 [libraries]
-linux.debug.x86_64 = "res://addons/semi_fixed_tick/bin/libsemi_fixed_tick.linux.template_debug.x86_64.so"
-linux.release.x86_64 = "res://addons/semi_fixed_tick/bin/libsemi_fixed_tick.linux.template_release.x86_64.so"
-windows.debug.x86_64 = "res://addons/semi_fixed_tick/bin/semi_fixed_tick.windows.template_debug.x86_64.dll"
-windows.release.x86_64 = "res://addons/semi_fixed_tick/bin/semi_fixed_tick.windows.template_release.x86_64.dll"
-macos.debug = "res://addons/semi_fixed_tick/bin/libsemi_fixed_tick.macos.template_debug.framework"
-macos.release = "res://addons/semi_fixed_tick/bin/libsemi_fixed_tick.macos.template_release.framework"
+windows.debug.x86_64 = "res://addons/semi_fixed_tick/bin/semi_fixed_tick.windows.debug.placeholder.dll"
+windows.release.x86_64 = "res://addons/semi_fixed_tick/bin/semi_fixed_tick.windows.release.placeholder.dll"

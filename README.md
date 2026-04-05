@@ -1,43 +1,69 @@
-# Stygian
+# iSFS - Interpolated Semi-Fixed Step Extension for Godot 4.x
 
-A small open source plugin for Godot 4.x focused on one specific problem: there is no simple, interpolation-friendly `semi-fixed step` utility you can drop into a project without handing over control of your simulation.
+A small GDExtension for Godot 4.x focused on one job: semi-fixed simulation stepping with smooth visual interpolation.
 
-This project stays intentionally small. The code is meant to be readable, predictable, and centered on one job: stable simulation stepping with smooth visual interpolation.
+The project stays intentionally narrow. It does not try to own your game loop or become a framework. It gives you timing and interpolation primitives that you can plug into your own simulation code.
 
 ## What it does
 
-- computes how many simulation ticks should run in the current frame,
-- returns an `alpha` value for interpolation between `prev` and `curr`,
-- stores and interpolates selected node properties,
-- exposes a runtime config you can tweak without rebuilding your game flow.
-
-This is not a gameplay framework and it does not manage your game loop. It is just timing and interpolation infrastructure.
+- computes how many simulation ticks should run in the current frame
+- returns an `alpha` value for interpolation between `prev` and `curr`
+- stores and interpolates selected node properties
+- exposes runtime config you can tweak from GDScript
 
 ## Why this exists
 
-You can build a custom semi-fixed loop in Godot 4.x, but once you also want clean visual interpolation, the code tends to become repetitive and annoying to maintain.
+Building a semi-fixed loop in Godot is manageable. Building one that also keeps visuals smooth and reusable across projects gets repetitive fast.
 
-This plugin exists to keep that part simple:
+This plugin exists to keep that part small and explicit:
 
-- your simulation stays in your hands,
-- the API stays small and easy to understand,
-- the implementation stays readable without digging through half the engine.
+- your simulation stays in your hands
+- the public API stays compact
+- the implementation stays readable
 
-## Quick start
+## Why Rust
 
-1. Copy `addons/semi_fixed_tick` into your Godot 4.x project.
-2. Make sure the native library referenced by `semi_fixed_tick.gdextension` is built for your platform.
+This repository originally started with a C++ GDExtension implementation.
+
+We moved the plugin to Rust for practical workflow reasons, not because the API changed:
+
+- on Windows, the C++ workflow kept colliding with DLL locking during iteration, especially when Godot had a library loaded and the next build tried to overwrite it
+- the Rust integration gave us a much smoother edit-build-sync loop for local development
+- the Rust code is easier to keep memory-safe while still exposing the same small Godot-facing API
+- keeping one implementation is simpler than maintaining a C++ and Rust version side by side
+
+So the current direction of the project is one addon, one public API, implemented in Rust.
+
+## Runtime package
+
+If you only want to use the plugin in a Godot game, you do not need the whole repository.
+
+The minimal runtime package is:
+
+```text
+addons/semi_fixed_tick/
+  semi_fixed_tick.gdextension
+  bin/
+    ...
+```
+
+The `.gdextension` file points to `res://addons/semi_fixed_tick/...`, so keeping that path in the consuming project is the simplest option.
+
+## Using it
+
+1. Copy `addons/semi_fixed_tick/` into your Godot 4.x project.
+2. Make sure the DLL referenced by `semi_fixed_tick.gdextension` matches your platform and build profile.
 3. Create a `SemiFixedStepService`.
 4. Register the fields you want interpolated.
-5. Use the result of `push_frame_delta(delta)` inside your own simulation loop.
+5. Run your simulation ticks from `push_frame_delta(delta)` and apply interpolation with the returned `alpha`.
 
 Example:
 
 ```gdscript
-var sft := SemiFixedStepService.new()
+var fixed_step := SemiFixedStepService.new()
 
 func _ready() -> void:
-    sft.set_runtime_config({
+    fixed_step.set_runtime_config({
         "target_tick_rate": 60,
         "max_steps_per_frame": 8,
         "max_frame_delta": 0.25,
@@ -45,23 +71,22 @@ func _ready() -> void:
         "interpolation_enabled": true,
     })
 
-    sft.register_interpolated_node(
-        $Player,
-        PackedStringArray(["global_position", "rotation"])
+    fixed_step.register_interpolated_node(
+        $PlayerVisual,
+        PackedStringArray(["position", "rotation"])
     )
 
 func _process(delta: float) -> void:
-    var result := sft.push_frame_delta(delta)
+    var result := fixed_step.push_frame_delta(delta)
 
-    sft.capture_prev_state()
-    for i in range(result.steps_to_run):
-        run_gameplay_simulation_tick(result.step_dt)
-    sft.capture_curr_state()
+    if result.steps_to_run > 0:
+        fixed_step.capture_prev_state()
+        for _i in range(result.steps_to_run):
+            run_gameplay_simulation_tick(result.step_dt)
+        fixed_step.capture_curr_state()
 
-    sft.apply_interpolation(result.alpha)
+    fixed_step.apply_interpolation(result.alpha)
 ```
-
-More details: [addons/semi_fixed_tick/docs/quick_start.md](/c:/Dev/stygian/addons/semi_fixed_tick/docs/quick_start.md)
 
 ## API at a glance
 
@@ -79,69 +104,63 @@ Core methods:
 - `set_runtime_config(config)`
 - `get_metrics()`
 
-## Status
-
-The project is intentionally narrow and currently focused on the MVP:
-
-- semi-fixed stepping,
-- interpolation for registered fields,
-- simple runtime config,
-- clean GDScript-facing API.
-
-If it grows, it should grow carefully. The priority is not feature count, it is clarity and usefulness.
-
 ## Building
 
-This plugin is implemented as a C++17 GDExtension.
+This repository is the development repo for the extension itself.
 
-To build it, you need:
+The current build flow is Rust-only and uses Cargo.
 
-- Godot 4.2+,
-- `godot-cpp`,
-- CMake 3.20+,
-- `GODOT_CPP_DIR` set correctly.
+Requirements:
 
-The starting point for the build setup is [addons/semi_fixed_tick/CMakeLists.txt](/c:/Dev/stygian/addons/semi_fixed_tick/CMakeLists.txt).
+- Godot 4.5+
+- Rust toolchain with Cargo
 
 ### Cursor / VS Code
 
-This repo includes `CMakePresets.json` and `.vscode` configs for Cursor / VS Code.
+The workspace includes Rust-focused `tasks.json` and `launch.json` entries.
 
-Set these environment variables first:
+Useful tasks:
 
-- `GODOT4_BIN` - path to the Godot 4 editor executable
-- `GODOT_PROJECT_PATH` - path to a Godot project where you want to test the plugin
+1. `Cargo: Build semi_fixed_tick debug`
+2. `Cargo: Sync semi_fixed_tick debug`
+3. `Cargo: Build semi_fixed_tick release`
+4. `Cargo: Sync semi_fixed_tick release`
 
-`GODOT_CPP_DIR` is optional in this repo. If it is not set, the build falls back to `C:/godot-cpp`.
+Useful debug menu entries:
 
-Then:
+- `Rust Cargo debug`
+- `Rust Cargo Editor debug`
+- `Rust Cargo release`
+- `Rust Cargo Editor release`
 
-1. Open the repo in Cursor.
-2. Run `CMake: Select Configure Preset` and choose `windows-debug` or `windows-release`, or build manually with the included tasks.
-3. Use `Terminal > Run Task > CMake: Build preset` to build a selected preset.
-4. Press `F5` and choose `Godot: Run project (windows-debug)` to build and launch your test project.
+`F5` can be used from the debug menu to run the matching build or build-and-open flow.
 
-The produced DLL is copied directly into `addons/semi_fixed_tick/bin/`, matching the paths from `semi_fixed_tick.gdextension`.
+The sync step copies the Cargo-built DLL into `addons/semi_fixed_tick/bin/` under a versioned filename and updates `semi_fixed_tick.gdextension` to point at the newest copy. That versioned copy is the current workaround for Windows DLL locking during iteration.
 
-The configure tasks try to auto-detect a desktop `gcc/g++` toolchain from `PATH` and common Windows locations such as MSYS2 UCRT64. Cross toolchains like `arm-none-eabi` are skipped automatically.
+If you keep a local `.env` file in the repo root, `scripts/run-godot-project.ps1` can use `GODOT4_BIN` from there to launch the editor.
 
-If `godot-cpp` is present but not built yet, the configure step bootstraps it automatically with CMake into `C:/godot-cpp/build/windows-debug` or `C:/godot-cpp/build/windows-release`, then resumes configuring this extension.
+## Demo scene
 
-The configure step also reads `compatibility_minimum` from `addons/semi_fixed_tick/semi_fixed_tick.gdextension` and automatically switches `godot-cpp` to the best matching local stable tag or branch before building it. If the `godot-cpp` worktree has local changes, the script stops instead of switching refs.
+This repository also contains a local Godot project and a small visual test scene:
 
-If you want to force GCC/MinGW instead of letting CMake discover a compiler automatically, copy `CMakeUserPresets.json.example` to `CMakeUserPresets.json`, adjust the compiler paths, and then select `windows-debug-gcc` or `windows-release-gcc`.
+- [test_shape.tscn](./test_shape.tscn)
+- [test_shape.gd](./test_shape.gd)
+
+It creates several moving shape pairs and uses the extension to interpolate their visuals between simulation ticks.
+
+Use `F6` in Godot to run the currently opened scene. `F5` runs the project main scene instead.
 
 ## Contributing
 
-If you want to help, that would be great. The most useful contributions right now are:
+Contributions are welcome, especially around:
 
-- tests and demo scenes,
-- API feedback,
-- performance improvements that do not hurt readability,
-- edge cases from real Godot 4.x projects.
+- tests and demo scenes
+- API feedback
+- performance improvements that keep the code readable
+- edge cases from real Godot 4.x projects
 
-An issue, a PR, or even a short note saying what felt confusing is genuinely useful. The goal is to make this project practical, not clever.
+Bug reports, feature requests, and design discussion should go through Issues. Code changes should go through Pull Requests.
 
 ## License
 
-MIT. See [LICENSE](/c:/Dev/stygian/LICENSE).
+MIT. See [LICENSE](./LICENSE).
