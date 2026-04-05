@@ -23,6 +23,5 @@ mono_crash.*.json
 build/
 addons/semi_fixed_tick/bin/
 addons/semi_fixed_tick/target/
-addons/semi_fixed_tick_rust/
 compile_commands.json
 desktop.ini

@@ -4,5 +4,5 @@ compatibility_minimum = "4.5"
 reloadable = true
 
 [libraries]
-windows.debug.x86_64 = "res://addons/semi_fixed_tick/bin/semi_fixed_tick.windows.debug.placeholder.dll"
+windows.debug.x86_64 = "res://addons/semi_fixed_tick/bin/semi_fixed_tick.debug.20260405083033979.dll"
 windows.release.x86_64 = "res://addons/semi_fixed_tick/bin/semi_fixed_tick.windows.release.placeholder.dll"
